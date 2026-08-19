@@ -81,7 +81,7 @@ export class NotasFiscais implements OnInit {
   constructor(
     private readonly invoiceService: InvoiceService,
     private readonly productService: ProductService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.carregarDados();
@@ -91,27 +91,34 @@ export class NotasFiscais implements OnInit {
     this.carregando.set(true);
     this.erro.set('');
 
-    forkJoin({
-      notas: this.invoiceService.getInvoices(),
-      produtos: this.productService.getProducts(),
-    }).subscribe({
-      next: ({ notas, produtos }) => {
+    this.invoiceService.getInvoices().subscribe({
+      next: (notas) => {
         this.notas.set(notas);
-        this.produtos.set(produtos);
         this.carregando.set(false);
       },
       error: () => {
-        this.erro.set(
-          'Não foi possível carregar as notas fiscais ou o catálogo de produtos.',
-        );
+        this.erro.set('Não foi possível carregar as notas fiscais.');
         this.carregando.set(false);
       },
+    });
+
+    this.productService.getProducts().subscribe({
+      next: (prods) => this.produtos.set(prods),
+      error: () => {
+        this.erro.set('Serviço de estoque indisponível no momento');
+      }
     });
   }
 
   abrirModalNovaNota(): void {
     this.productService.getProducts().subscribe({
-      next: (prods) => this.produtos.set(prods),
+      next: (prods) => {
+        this.produtos.set(prods);
+      },
+      error: () => {
+        this.erroModalNota.set('Serviço de estoque indisponível no momento. É possível realizar o caddastro da NF, mas a impressão só será realizada depois do reestabelecimento do serviço de estoque.');
+        this.carregando.set(false);
+      },
     });
 
     this.itensRascunho.set([]);

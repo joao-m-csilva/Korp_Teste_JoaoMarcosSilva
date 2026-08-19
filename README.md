@@ -112,7 +112,7 @@ flowchart LR
 ### Frontend
 
 - **Angular 22** (Componentes Standalone, Signals, Control Flow nativo `@if`/`@for`)
-- **RxJS** (Comunicação assíncrona, Observables e `forkJoin`)
+- **RxJS** (Comunicação assíncrona e Observables desacoplados)
 - **Vanilla CSS** (Design system responsivo e moderno sem dependências externas pesadas)
 - **Vitest** (Testes unitários automatizados)
 

@@ -23,7 +23,7 @@ export class Home implements OnInit {
   constructor(
     private readonly productService: ProductService,
     private readonly invoiceService: InvoiceService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.carregarDados();
@@ -33,31 +33,32 @@ export class Home implements OnInit {
     this.carregando.set(true);
     this.erro.set('');
 
-    forkJoin({
-      produtos: this.productService.getProducts(),
-      notas: this.invoiceService.getInvoices(),
-    }).subscribe({
-      next: ({ produtos, notas }) => {
-        this.quantidadeProdutos.set(produtos.length);
 
+    this.productService.getProducts().subscribe({
+      next: (prods) => {
+        this.quantidadeProdutos.set(prods.length);
+      },
+      error: () => {
+        this.erro.set('Serviço de Estoque indisponível no momento.');
+      }
+    });
+
+    this.invoiceService.getInvoices().subscribe({
+      next: (notas) => {
         const abertas = notas.filter((n) => n.status === 'Aberta').length;
         const fechadas = notas.filter((n) => n.status === 'Fechada').length;
         const faturado = notas
           .filter((n) => n.status === 'Fechada')
           .reduce((acc, curr) => acc + (curr.total_Value || 0), 0);
-
         this.notasAbertas.set(abertas);
         this.notasFechadas.set(fechadas);
         this.totalFaturado.set(faturado);
-        this.carregando.set(false);
       },
       error: () => {
-        this.erro.set(
-          'Não foi possível carregar os dados dos serviços de Estoque e Faturamento. Verifique se as APIs estão em execução.',
-        );
-        this.carregando.set(false);
-      },
+        this.erro.set('Serviço de Faturamento indisponível no momento.');
+      }
     });
+
   }
 
   protected formatoValor(valor: number): string {
