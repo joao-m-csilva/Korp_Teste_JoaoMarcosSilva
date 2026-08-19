@@ -4,6 +4,20 @@ Solução desenvolvida para o teste prático da vaga de **Estágio de Desenvolvi
 
 ---
 
+## Demonstração da Aplicação
+
+### Painel de Controle (Home)
+![Painel de Controle](.github/assets/ScreenCapture001.png)
+
+### Cadastro e Consulta de Produtos
+![Produtos](.github/assets/ScreenCapture002.png)
+
+### Emissão e Impressão de Notas Fiscais
+![Notas Fiscais](.github/assets/ScreenCapture003.png)
+
+
+---
+
 ## Arquitetura da Solução
 
 ```mermaid
