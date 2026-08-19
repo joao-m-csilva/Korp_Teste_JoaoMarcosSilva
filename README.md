@@ -23,36 +23,57 @@ Solução desenvolvida para o teste prático da vaga de **Estágio de Desenvolvi
 ## Estrutura do Projeto
 
 ```text
+.
+├── DETALHAMENTO_TECNICO.md
 ├── README.md
 ├── backend
-│   ├── Korp.Inventory.API
-│   │   ├── Controllers
-│   │   ├── DTOs
-│   │   ├── Data
-│   │   ├── Dockerfile
-│   │   ├── Korp.Inventory.API.csproj
-│   │   ├── Korp.Inventory.API.http
-│   │   ├── Korp.Inventory.API.sln
-│   │   ├── Migrations
-│   │   ├── Models
-│   │   ├── Program.cs
-│   │   ├── Properties
-│   │   ├── appsettings.Development.json
-│   │   └── appsettings.json
-│   └── Korp.Invoicing.API
-│       ├── Controllers
-│       ├── DTOs
-│       ├── Data
-│       ├── Dockerfile
-│       ├── Korp.Invoicing.API.csproj
-│       ├── Korp.Invoicing.API.http
-│       ├── Korp.Invoicing.API.sln
-│       ├── Migrations
-│       ├── Models
-│       ├── Program.cs
-│       ├── Properties
-│       ├── appsettings.Development.json
-│       └── appsettings.json
+│   ├── Korp.Inventory.API
+│   │   ├── Controllers
+│   │   │   └── ProductsController.cs
+│   │   ├── DTOs
+│   │   │   └── ConsumeStockRequestDto.cs
+│   │   ├── Data
+│   │   │   └── InventoryDbContext.cs
+│   │   ├── Dockerfile
+│   │   ├── Korp.Inventory.API.csproj
+│   │   ├── Korp.Inventory.API.http
+│   │   ├── Korp.Inventory.API.sln
+│   │   ├── Korp.Inventory.API.sln.DotSettings.user
+│   │   ├── Migrations
+│   │   │   ├── 20260818201804_InitialCreate.Designer.cs
+│   │   │   ├── 20260818201804_InitialCreate.cs
+│   │   │   └── InventoryDbContextModelSnapshot.cs
+│   │   ├── Models
+│   │   │   ├── InvoiceRequest.cs
+│   │   │   └── Product.cs
+│   │   ├── Program.cs
+│   │   ├── Properties
+│   │   │   └── launchSettings.json
+│   │   ├── appsettings.Development.json
+│   │   └── appsettings.json
+│   └── Korp.Invoicing.API
+│       ├── Controllers
+│       │   └── InvoicesController.cs
+│       ├── DTOs
+│       │   └── ConsumeStockDto.cs
+│       ├── Data
+│       │   └── InvoiceDbContext.cs
+│       ├── Dockerfile
+│       ├── Korp.Invoicing.API.csproj
+│       ├── Korp.Invoicing.API.http
+│       ├── Korp.Invoicing.API.sln
+│       ├── Migrations
+│       │   ├── 20260818203955_InitialCreate.Designer.cs
+│       │   ├── 20260818203955_InitialCreate.cs
+│       │   └── InvoiceDbContextModelSnapshot.cs
+│       ├── Models
+│       │   ├── Invoice.cs
+│       │   └── InvoiceItem.cs
+│       ├── Program.cs
+│       ├── Properties
+│       │   └── launchSettings.json
+│       ├── appsettings.Development.json
+│       └── appsettings.json
 ├── docker-compose.yml
 └── frontend
     ├── AGENTS.md
@@ -60,13 +81,25 @@ Solução desenvolvida para o teste prático da vaga de **Estágio de Desenvolvi
     ├── package-lock.json
     ├── package.json
     ├── public
-    │   ├── favicon.ico
-    │   └── logo_korp.png
+    │   ├── favicon.ico
+    │   └── logo_korp.png
     ├── src
-    │   ├── app
-    │   ├── index.html
-    │   ├── main.ts
-    │   └── styles.css
+    │   ├── app
+    │   │   ├── app.config.ts
+    │   │   ├── app.css
+    │   │   ├── app.html
+    │   │   ├── app.routes.ts
+    │   │   ├── app.spec.ts
+    │   │   ├── app.ts
+    │   │   ├── home
+    │   │   ├── invoices
+    │   │   ├── layout
+    │   │   ├── models
+    │   │   ├── products
+    │   │   └── services
+    │   ├── index.html
+    │   ├── main.ts
+    │   └── styles.css
     ├── tsconfig.app.json
     ├── tsconfig.json
     └── tsconfig.spec.json
