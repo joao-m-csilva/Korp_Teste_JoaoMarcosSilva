@@ -1,0 +1,7 @@
+﻿services:
+  korp.invoicing.api:
+    image: korp.invoicing.api
+    build:
+      context: .
+      dockerfile: Dockerfile
+

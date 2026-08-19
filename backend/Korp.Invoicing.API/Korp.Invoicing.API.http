@@ -1,0 +1,33 @@
+@host = http://localhost:7077
+
+### Listar todas as notas fiscais
+GET {{host}}/api/invoices
+Accept: application/json
+
+###
+
+### Buscar nota fiscal por ID
+GET {{host}}/api/invoices/1
+Accept: application/json
+
+###
+
+### Criar nova nota fiscal (Situação: Aberta)
+POST {{host}}/api/invoices
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2,
+      "unitPrice": 150.00
+    }
+  ]
+}
+
+###
+
+### Imprimir / Fechar nota fiscal (Consome estoque e define Situação: Fechada)
+POST {{host}}/api/invoices/1/print
+Content-Type: application/json

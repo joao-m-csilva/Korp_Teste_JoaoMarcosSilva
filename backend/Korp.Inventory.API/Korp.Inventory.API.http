@@ -1,0 +1,39 @@
+@host = http://localhost:7058
+
+### Listar todos os produtos
+GET {{host}}/api/products
+Accept: application/json
+
+###
+
+### Buscar produto por ID
+GET {{host}}/api/products/1
+Accept: application/json
+
+###
+
+### Cadastrar novo produto
+POST {{host}}/api/products
+Content-Type: application/json
+
+{
+  "code": "1001",
+  "description": "Sensor de Temperatura PT100 Industrial",
+  "unit": "UN",
+  "balance": 25
+}
+
+###
+
+### Consumir estoque de produtos
+POST {{host}}/api/products/consume
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2
+    }
+  ]
+}

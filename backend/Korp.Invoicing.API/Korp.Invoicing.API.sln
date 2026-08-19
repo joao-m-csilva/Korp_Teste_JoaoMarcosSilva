@@ -1,0 +1,21 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Korp.Invoicing.API", "Korp.Invoicing.API.csproj", "{8524F2C8-B727-45FD-A64B-B5D20F91A2BB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{42273AFE-6E06-40A1-99CE-A6D669978E50}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8524F2C8-B727-45FD-A64B-B5D20F91A2BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8524F2C8-B727-45FD-A64B-B5D20F91A2BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8524F2C8-B727-45FD-A64B-B5D20F91A2BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8524F2C8-B727-45FD-A64B-B5D20F91A2BB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

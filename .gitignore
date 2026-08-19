@@ -1,0 +1,67 @@
+# =========================
+# OS / Environment
+# =========================
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example
+
+# =========================
+# Node / Angular
+# =========================
+**/node_modules/
+**/dist/
+**/tmp/
+**/out-tsc/
+**/bazel-out/
+**/.angular/cache/
+**/.sass-cache/
+**/coverage/
+**/typings/
+**/__screenshots__/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+testem.log
+libpeerconnection.log
+connect.lock
+
+# =========================
+# .NET / C# build artifacts
+# =========================
+**/bin/
+**/obj/
+*.user
+*.suo
+
+# =========================
+# IDEs / Editors
+# =========================
+**/.idea/
+**/.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+**/.history/
+
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# JetBrains files
+**/shelf/
+**/workspace.xml
+**/modules.xml
+**/projectSettingsUpdater.xml
+**/contentModel.xml
+**/.idea*.iml
+**/httpRequests/
+**/queries/
+**/dataSources/
+**/dataSources.local.xml

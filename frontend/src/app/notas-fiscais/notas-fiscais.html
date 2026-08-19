@@ -1,0 +1,460 @@
+<div class="page-heading">
+  <div>
+    <h1>Notas Fiscais</h1>
+    <p>Acompanhamento, emissão e fechamento de notas fiscais</p>
+  </div>
+
+  <button type="button" class="btn-primary" (click)="abrirModalNovaNota()">
+    + Nova Nota Fiscal
+  </button>
+</div>
+
+@if (sucesso()) {
+  <div class="alert-success">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+    <p>{{ sucesso() }}</p>
+  </div>
+}
+
+@if (erro()) {
+  <div class="alert-error">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <p>{{ erro() }}</p>
+  </div>
+}
+
+@if (erroImpressao()) {
+  <div class="alert-error">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <p>{{ erroImpressao() }}</p>
+  </div>
+}
+
+<section class="table-card">
+  <!-- Abas e Busca -->
+  <div class="tabs-header">
+    <div class="tabs-group" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        class="tab-btn"
+        [class.active]="abaAtiva() === 'todas'"
+        (click)="abaAtiva.set('todas')"
+      >
+        Todas <span class="tab-count">{{ notas().length }}</span>
+      </button>
+
+      <button
+        type="button"
+        role="tab"
+        class="tab-btn"
+        [class.active]="abaAtiva() === 'abertas'"
+        (click)="abaAtiva.set('abertas')"
+      >
+        Abertas <span class="tab-count open">{{ totalAbertas() }}</span>
+      </button>
+
+      <button
+        type="button"
+        role="tab"
+        class="tab-btn"
+        [class.active]="abaAtiva() === 'fechadas'"
+        (click)="abaAtiva.set('fechadas')"
+      >
+        Fechadas <span class="tab-count closed">{{ totalFechadas() }}</span>
+      </button>
+    </div>
+
+    <div class="search-input-wrap">
+      <span class="search-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </span>
+      <input
+        type="search"
+        [ngModel]="busca()"
+        (ngModelChange)="busca.set($event)"
+        placeholder="Buscar por número da nota..."
+        aria-label="Buscar notas fiscais"
+      />
+    </div>
+  </div>
+
+  @if (carregando()) {
+    <div class="table-state-box">
+      <div class="spinner"></div>
+      <p>Carregando notas fiscais...</p>
+    </div>
+  } @else if (notasFiltradas().length === 0) {
+    <div class="table-state-box">
+      @if (busca()) {
+        <p>Nenhuma nota fiscal encontrada com o número "<strong>{{ busca() }}</strong>".</p>
+      } @else if (abaAtiva() === 'abertas') {
+        <p>Não há notas fiscais abertas no momento.</p>
+      } @else if (abaAtiva() === 'fechadas') {
+        <p>Não há notas fiscais fechadas no momento.</p>
+      } @else {
+        <p>Nenhuma nota fiscal cadastrada ainda. Clique em "<strong>+ Nova Nota Fiscal</strong>" para emitir.</p>
+      }
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Data de Emissão</th>
+            <th>Qtd. Itens</th>
+            <th>Valor Total</th>
+            <th>Situação</th>
+            <th class="text-right">Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (nota of notasFiltradas(); track nota.id) {
+            <tr (click)="abrirDetalhes(nota)" class="clickable-row">
+              <td>
+                <span class="invoice-number">NF-e #{{ nota.number }}</span>
+              </td>
+              <td>
+                <span class="invoice-date">{{ formatoData(nota.date) }}</span>
+              </td>
+              <td>
+                <span class="items-badge">{{ nota.items ? nota.items.length : 0 }} item(s)</span>
+              </td>
+              <td>
+                <strong class="invoice-total">{{ formatoValor(nota.total_Value) }}</strong>
+              </td>
+              <td>
+                <span
+                  class="status-badge"
+                  [class.status-open]="nota.status === 'Aberta'"
+                  [class.status-closed]="nota.status === 'Fechada'"
+                >
+                  {{ nota.status }}
+                </span>
+              </td>
+              <td class="text-right">
+                <div class="actions-group" (click)="$event.stopPropagation()">
+                  <button
+                    type="button"
+                    class="btn-action-view"
+                    (click)="abrirDetalhes(nota)"
+                    title="Ver detalhes da nota"
+                  >
+                    Ver Detalhes
+                  </button>
+
+                  @if (nota.status === 'Aberta') {
+                    <button
+                      type="button"
+                      class="btn-action-print"
+                      (click)="imprimirNota(nota.id, $event)"
+                      [disabled]="idProcessandoImpressao() === nota.id"
+                      title="Imprimir e fechar nota fiscal"
+                    >
+                      @if (idProcessandoImpressao() === nota.id) {
+                        <span>Processando...</span>
+                      } @else {
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: -1px;">
+                          <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                          <rect x="6" y="14" width="12" height="8"></rect>
+                        </svg>
+                        <span>Imprimir</span>
+                      }
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+<!-- Modal de Detalhes da Nota Fiscal -->
+@if (notaDetalhes(); as nota) {
+  <div class="modal-backdrop" (click)="fecharDetalhes()"></div>
+  <div class="modal-dialog modal-large" role="dialog" aria-modal="true" aria-labelledby="modal-detalhes-title">
+    <div class="modal-header">
+      <div>
+        <h3 id="modal-detalhes-title">Detalhes da Nota Fiscal #{{ nota.number }}</h3>
+        <span class="modal-subtitle">Emitida em {{ formatoData(nota.date) }}</span>
+      </div>
+      <button type="button" class="btn-close" (click)="fecharDetalhes()" aria-label="Fechar modal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body printable-content">
+      <div class="invoice-summary-bar">
+        <div>
+          <span class="info-label">Situação</span>
+          <span
+            class="status-badge"
+            [class.status-open]="nota.status === 'Aberta'"
+            [class.status-closed]="nota.status === 'Fechada'"
+          >
+            {{ nota.status }}
+          </span>
+        </div>
+
+        <div>
+          <span class="info-label">Total da Nota</span>
+          <strong class="info-total">{{ formatoValor(nota.total_Value) }}</strong>
+        </div>
+      </div>
+
+      <h4>Itens da Nota Fiscal</h4>
+      <div class="table-wrap items-table-wrap">
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th class="text-right">Qtd</th>
+              <th class="text-right">Preço Unitário</th>
+              <th class="text-right">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of nota.items; track item.id || item.productId) {
+              <tr>
+                <td>
+                  <strong>{{ obterDescricaoProduto(item.productId) }}</strong>
+                </td>
+                <td class="text-right">{{ item.quantity }} {{ obterUnidadeProduto(item.productId) }}</td>
+                <td class="text-right">{{ formatoValor(item.unitPrice) }}</td>
+                <td class="text-right">
+                  <strong>{{ formatoValor(item.quantity * item.unitPrice) }}</strong>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (erroImpressao()) {
+        <div class="alert-modal-error">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <p>{{ erroImpressao() }}</p>
+        </div>
+      }
+
+      <div class="modal-footer no-print">
+        <button type="button" class="btn-secondary" (click)="fecharDetalhes()">
+          Fechar
+        </button>
+
+        @if (nota.status === 'Aberta') {
+          <button
+            type="button"
+            class="btn-primary btn-print-main"
+            (click)="imprimirNota(nota.id)"
+            [disabled]="idProcessandoImpressao() === nota.id"
+          >
+            @if (idProcessandoImpressao() === nota.id) {
+              <span>Processando fechamento...</span>
+            } @else {
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: -2px;">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+              </svg>
+              <span>Imprimir & Fechar Nota</span>
+            }
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal de Emissão de Nova Nota Fiscal -->
+@if (modalNovaNotaAberto()) {
+  <div class="modal-backdrop" (click)="fecharModalNovaNota()"></div>
+  <div class="modal-dialog modal-large" role="dialog" aria-modal="true" aria-labelledby="modal-nova-nota-title">
+    <div class="modal-header">
+      <h3 id="modal-nova-nota-title">Emitir Nova Nota Fiscal</h3>
+      <button type="button" class="btn-close" (click)="fecharModalNovaNota()" [disabled]="salvandoNota()" aria-label="Fechar modal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      @if (erroModalNota()) {
+        <div class="alert-modal-error">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <p>{{ erroModalNota() }}</p>
+        </div>
+      }
+
+      <fieldset class="item-add-box">
+        <legend>Adicionar Produtos na Nota</legend>
+
+        <div class="item-add-grid">
+          <div class="form-group flex-2">
+            <label for="select-produto">Produto *</label>
+            <select
+              id="select-produto"
+              [(ngModel)]="produtoSelecionadoId"
+            >
+              <option [ngValue]="null">Selecione um produto do estoque</option>
+              @for (p of produtos(); track p.id) {
+                <option [ngValue]="p.id" [disabled]="p.balance <= 0">
+                  {{ p.code }} - {{ p.description }} (Saldo: {{ p.balance }} {{ p.unit }})
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="input-qtd">Quantidade *</label>
+            <input
+              id="input-qtd"
+              type="number"
+              min="0.01"
+              step="any"
+              placeholder="Qtd"
+              [(ngModel)]="quantidadeItem"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="input-preco">Preço Unit. (R$) *</label>
+            <input
+              id="input-preco"
+              type="number"
+              min="0.01"
+              step="0.01"
+              placeholder="0,00"
+              [(ngModel)]="precoUnitarioItem"
+            />
+          </div>
+
+          <div class="form-group-btn">
+            <button
+              type="button"
+              class="btn-secondary btn-add-item"
+              (click)="adicionarItemRascunho()"
+            >
+              + Adicionar
+            </button>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Lista de itens adicionados -->
+      <h4>Itens Adicionados</h4>
+      @if (itensRascunho().length === 0) {
+        <p class="empty-draft-msg">Nenhum item adicionado ainda. Selecione um produto acima e clique em "Adicionar".</p>
+      } @else {
+        <div class="table-wrap draft-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th class="text-right">Qtd</th>
+                <th class="text-right">Preço Unitário</th>
+                <th class="text-right">Subtotal</th>
+                <th class="text-right">Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of itensRascunho(); track item.productId) {
+                <tr>
+                  <td>
+                    <strong>{{ item.productDescription }}</strong>
+                  </td>
+                  <td class="text-right">{{ item.quantity }} {{ item.unit }}</td>
+                  <td class="text-right">{{ formatoValor(item.unitPrice) }}</td>
+                  <td class="text-right">
+                    <strong>{{ formatoValor(item.quantity * item.unitPrice) }}</strong>
+                  </td>
+                  <td class="text-right">
+                    <button
+                      type="button"
+                      class="btn-remove-item"
+                      (click)="removerItemRascunho(item.productId)"
+                      title="Remover item"
+                      aria-label="Remover item"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" class="text-right">
+                  <strong>Total da Nota Fiscal:</strong>
+                </td>
+                <td class="text-right">
+                  <strong class="draft-total-value">{{ formatoValor(totalRascunho()) }}</strong>
+                </td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="fecharModalNovaNota()"
+          [disabled]="salvandoNota()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="salvarNotaFiscal()"
+          [disabled]="salvandoNota() || itensRascunho().length === 0"
+        >
+          @if (salvandoNota()) {
+            <span>Emitindo Nota...</span>
+          } @else {
+            <span>Salvar Nota Fiscal</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
