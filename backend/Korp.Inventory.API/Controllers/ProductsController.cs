@@ -23,7 +23,6 @@ public class ProductsController : ControllerBase
         _context = context;
     }
 
-    // List all products
     [HttpGet]
     public async Task<IActionResult> GetProducts()
     {
@@ -31,7 +30,6 @@ public class ProductsController : ControllerBase
         return Ok(products);
     }
 
-    // List product by id
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetProductById(int id)
     {
@@ -46,7 +44,6 @@ public class ProductsController : ControllerBase
         return Ok(product);
     }
 
-    // New product registration
     [HttpPost]
     public async Task<IActionResult> CreateProduct([FromBody] Product product)
     {
@@ -73,10 +70,7 @@ public class ProductsController : ControllerBase
             Console.WriteLine($"Error location: {ex.StackTrace}");
         }
 
-        ;
-
         return StatusCode(500, new { message = "Erro interno no servidor. Estamos trabalhando para corrigir. Tente novamente em breve." });
-
     }
 
     [HttpPost("consume")]
@@ -127,8 +121,7 @@ public class ProductsController : ControllerBase
             message = "Estoque consumido com sucesso."
         });
     }
-    
-    // Error treatment 
+
     private string? ProductValidation(Product product)
     {
         if (product == null)

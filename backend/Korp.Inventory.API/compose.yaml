@@ -1,7 +1,0 @@
-﻿services:
-  korp.inventory.api:
-    image: korp.inventory.api
-    build:
-      context: .
-      dockerfile: Dockerfile
-

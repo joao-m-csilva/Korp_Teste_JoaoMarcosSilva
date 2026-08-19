@@ -22,7 +22,6 @@ public class InvoicesController : ControllerBase
         _inventoryClient = httpClientFactory.CreateClient("Inventory");
     }
 
-    // Invoice Creation
     [HttpPost]
     public async Task<IActionResult> CreateInvoice(Invoice invoice)
     {
@@ -40,8 +39,6 @@ public class InvoicesController : ControllerBase
             {
                 message = "A quantidade dos itens deve ser maior que zero."
             });
-
-
         }
 
         if (invoice.Items.Any(i => i.UnitPrice <= 0))
@@ -67,7 +64,6 @@ public class InvoicesController : ControllerBase
             invoice);
     }
 
-    // List all Invoices
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Invoice>>> GetInvoices()
     {
@@ -79,7 +75,6 @@ public class InvoicesController : ControllerBase
         return Ok(invoices);
     }
 
-    // List invoices by ID
     [HttpGet("{id:int}")]
     public async Task<ActionResult> GetInvoice(int id)
     {
@@ -96,7 +91,6 @@ public class InvoicesController : ControllerBase
         return Ok(invoice);
     }
 
-    // Invoice printing and inventory API call through HTTP to consume stock
     [HttpPost("{id:int}/print")]
     public async Task<IActionResult> PrintInvoice(int id)
     {
