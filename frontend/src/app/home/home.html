@@ -3,7 +3,7 @@
     <h1>Painel de Controle</h1>
     <p>Visão geral do estoque e faturamento</p>
   </div>
-  <button class="btn-refresh" type="button" (click)="carregarDados()" title="Atualizar dados">
+  <button class="btn-refresh" type="button" (click)="loadData()" title="Atualizar dados">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M23 4v6h-6"></path>
       <path d="M1 20v-6h6"></path>
@@ -13,14 +13,14 @@
   </button>
 </div>
 
-@if (erro()) {
+@if (errorMessage()) {
   <div class="alert-error">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="10"></circle>
       <line x1="12" y1="8" x2="12" y2="12"></line>
       <line x1="12" y1="16" x2="12.01" y2="16"></line>
     </svg>
-    <p>{{ erro() }}</p>
+    <p>{{ errorMessage() }}</p>
   </div>
 }
 
@@ -35,7 +35,7 @@
     </div>
     <div class="card-body">
       <span class="card-label">Produtos Cadastrados</span>
-      <strong>{{ quantidadeProdutos() }}</strong>
+      <strong>{{ productsCount() }}</strong>
       <small>Itens disponíveis no cadastro</small>
     </div>
   </article>
@@ -51,7 +51,7 @@
     </div>
     <div class="card-body">
       <span class="card-label">Notas Fiscais Abertas</span>
-      <strong>{{ notasAbertas() }}</strong>
+      <strong>{{ openInvoicesCount() }}</strong>
       <small>Aguardando impressão e baixa</small>
     </div>
   </article>
@@ -65,7 +65,7 @@
     </div>
     <div class="card-body">
       <span class="card-label">Notas Fiscais Fechadas</span>
-      <strong>{{ notasFechadas() }}</strong>
+      <strong>{{ closedInvoicesCount() }}</strong>
       <small>Concluídas com estoque baixado</small>
     </div>
   </article>
@@ -79,7 +79,7 @@
     </div>
     <div class="card-body">
       <span class="card-label">Total Faturado</span>
-      <strong>{{ formatoValor(totalFaturado()) }}</strong>
+      <strong>{{ formatCurrency(totalRevenue()) }}</strong>
       <small>Soma das notas fechadas</small>
     </div>
   </article>
@@ -88,7 +88,7 @@
 <section class="quick-actions-card">
   <h2>Ações Rápidas</h2>
   <div class="actions-grid">
-    <a routerLink="/produtos" class="action-btn">
+    <a routerLink="/products" class="action-btn">
       <span class="action-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
@@ -108,7 +108,7 @@
       </span>
     </a>
 
-    <a routerLink="/notas-fiscais" class="action-btn">
+    <a routerLink="/invoices" class="action-btn">
       <span class="action-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>

@@ -1,7 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import { ProductService } from '../services/product.service';
 import { InvoiceService } from '../services/invoice.service';
 
@@ -13,58 +12,56 @@ import { InvoiceService } from '../services/invoice.service';
   styleUrl: './home.css',
 })
 export class Home implements OnInit {
-  protected readonly quantidadeProdutos = signal(0);
-  protected readonly notasAbertas = signal(0);
-  protected readonly notasFechadas = signal(0);
-  protected readonly totalFaturado = signal(0);
-  protected readonly carregando = signal(true);
-  protected readonly erro = signal('');
+  protected readonly productsCount = signal(0);
+  protected readonly openInvoicesCount = signal(0);
+  protected readonly closedInvoicesCount = signal(0);
+  protected readonly totalRevenue = signal(0);
+  protected readonly isLoading = signal(true);
+  protected readonly errorMessage = signal('');
 
   constructor(
     private readonly productService: ProductService,
     private readonly invoiceService: InvoiceService,
-  ) { }
+  ) {}
 
   ngOnInit(): void {
-    this.carregarDados();
+    this.loadData();
   }
 
-  carregarDados(): void {
-    this.carregando.set(true);
-    this.erro.set('');
-
+  loadData(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
 
     this.productService.getProducts().subscribe({
-      next: (prods) => {
-        this.quantidadeProdutos.set(prods.length);
+      next: (products) => {
+        this.productsCount.set(products.length);
       },
       error: () => {
-        this.erro.set('Serviço de Estoque indisponível no momento.');
-      }
+        this.errorMessage.set('Serviço de Estoque indisponível no momento.');
+      },
     });
 
     this.invoiceService.getInvoices().subscribe({
-      next: (notas) => {
-        const abertas = notas.filter((n) => n.status === 'Aberta').length;
-        const fechadas = notas.filter((n) => n.status === 'Fechada').length;
-        const faturado = notas
+      next: (invoices) => {
+        const open = invoices.filter((n) => n.status === 'Aberta').length;
+        const closed = invoices.filter((n) => n.status === 'Fechada').length;
+        const revenue = invoices
           .filter((n) => n.status === 'Fechada')
           .reduce((acc, curr) => acc + (curr.total_Value || 0), 0);
-        this.notasAbertas.set(abertas);
-        this.notasFechadas.set(fechadas);
-        this.totalFaturado.set(faturado);
+        this.openInvoicesCount.set(open);
+        this.closedInvoicesCount.set(closed);
+        this.totalRevenue.set(revenue);
       },
       error: () => {
-        this.erro.set('Serviço de Faturamento indisponível no momento.');
-      }
+        this.errorMessage.set('Serviço de Faturamento indisponível no momento.');
+      },
     });
-
   }
 
-  protected formatoValor(valor: number): string {
+  protected formatCurrency(value: number): string {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
-    }).format(valor);
+    }).format(value);
   }
 }

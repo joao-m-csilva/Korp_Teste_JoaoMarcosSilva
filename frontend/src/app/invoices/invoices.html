@@ -1,0 +1,441 @@
+<div class="page-heading no-print">
+  <div>
+    <h1>Notas Fiscais</h1>
+    <p>Emissão, consulta e impressão de notas fiscais de venda</p>
+  </div>
+
+  <button type="button" class="btn-primary" (click)="openNewInvoiceModal()">
+    + Nova Nota Fiscal
+  </button>
+</div>
+
+@if (successMessage()) {
+  <div class="alert-success no-print">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+    <p>{{ successMessage() }}</p>
+  </div>
+}
+
+@if (errorMessage()) {
+  <div class="alert-error no-print">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <p>{{ errorMessage() }}</p>
+  </div>
+}
+
+<section class="table-card no-print">
+  <div class="tabs-header">
+    <div class="tabs-group" role="tablist">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'all'"
+        (click)="activeTab.set('all')"
+      >
+        Todas
+        <span class="tab-count">{{ invoices().length }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'open'"
+        (click)="activeTab.set('open')"
+      >
+        Abertas
+        <span class="tab-count open">{{ totalOpen() }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'closed'"
+        (click)="activeTab.set('closed')"
+      >
+        Fechadas
+        <span class="tab-count closed">{{ totalClosed() }}</span>
+      </button>
+    </div>
+
+    <div class="search-input-wrap">
+      <span class="search-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </span>
+      <input
+        type="search"
+        [ngModel]="search()"
+        (ngModelChange)="search.set($event)"
+        placeholder="Buscar por número da nota..."
+        aria-label="Buscar notas fiscais"
+      />
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="table-state-box">
+      <div class="spinner"></div>
+      <p>Carregando notas fiscais...</p>
+    </div>
+  } @else if (filteredInvoices().length === 0) {
+    <div class="table-state-box">
+      @if (search()) {
+        <p>Nenhuma nota fiscal encontrada com o número "<strong>{{ search() }}</strong>".</p>
+      } @else if (activeTab() === 'open') {
+        <p>Nenhuma nota fiscal com situação <strong>Aberta</strong>.</p>
+      } @else if (activeTab() === 'closed') {
+        <p>Nenhuma nota fiscal com situação <strong>Fechada</strong>.</p>
+      } @else {
+        <p>Nenhuma nota fiscal emitida ainda. Clique em "<strong>+ Nova Nota Fiscal</strong>" para emitir.</p>
+      }
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Número</th>
+            <th>Data de Emissão</th>
+            <th>Itens</th>
+            <th class="text-right">Valor Total</th>
+            <th>Situação</th>
+            <th class="text-right">Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (invoice of filteredInvoices(); track invoice.id) {
+            <tr class="clickable-row" (click)="openDetails(invoice)">
+              <td>
+                <span class="invoice-number">NF-{{ invoice.number }}</span>
+              </td>
+              <td>
+                <span class="invoice-date">{{ formatDate(invoice.date) }}</span>
+              </td>
+              <td>
+                <span class="items-badge">{{ invoice.items.length }} {{ invoice.items.length === 1 ? 'item' : 'itens' }}</span>
+              </td>
+              <td class="text-right">
+                <strong class="invoice-total">{{ formatCurrency(invoice.total_Value) }}</strong>
+              </td>
+              <td>
+                <span
+                  class="status-badge"
+                  [class.status-open]="invoice.status === 'Aberta'"
+                  [class.status-closed]="invoice.status === 'Fechada'"
+                >
+                  {{ invoice.status }}
+                </span>
+              </td>
+              <td class="text-right" (click)="$event.stopPropagation()">
+                <div class="actions-group">
+                  <button
+                    type="button"
+                    class="btn-action-view"
+                    (click)="openDetails(invoice)"
+                  >
+                    Visualizar
+                  </button>
+
+                  @if (invoice.status === 'Aberta') {
+                    <button
+                      type="button"
+                      class="btn-action-print"
+                      (click)="printInvoice(invoice.id, $event)"
+                      [disabled]="printingInvoiceId() === invoice.id"
+                    >
+                      @if (printingInvoiceId() === invoice.id) {
+                        <span>Imprimindo...</span>
+                      } @else {
+                        <span>Imprimir</span>
+                      }
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
+
+<!-- Modal: Nova Nota Fiscal -->
+@if (isNewInvoiceModalOpen()) {
+  <div class="modal-backdrop" (click)="closeNewInvoiceModal()"></div>
+  <div class="modal-dialog modal-large" role="dialog" aria-modal="true" aria-labelledby="modal-nova-nf-title">
+    <div class="modal-header">
+      <div>
+        <h3 id="modal-nova-nf-title">Emitir Nova Nota Fiscal</h3>
+        <span class="modal-subtitle">Selecione os produtos e as quantidades para emissão</span>
+      </div>
+      <button type="button" class="btn-close" (click)="closeNewInvoiceModal()" [disabled]="isSavingInvoice()" aria-label="Fechar modal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      @if (modalErrorMessage()) {
+        <div class="alert-modal-error">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <p>{{ modalErrorMessage() }}</p>
+        </div>
+      }
+
+      <fieldset class="item-add-box">
+        <legend>Adicionar Item na Nota</legend>
+        <div class="item-add-grid">
+          <div class="form-group flex-2">
+            <label for="select-produto">Produto *</label>
+            <select
+              id="select-produto"
+              [(ngModel)]="selectedProductId"
+            >
+              <option [ngValue]="null">-- Selecione um produto --</option>
+              @for (prod of products(); track prod.id) {
+                <option [ngValue]="prod.id" [disabled]="prod.balance <= 0">
+                  {{ prod.code }} - {{ prod.description }} (Saldo: {{ prod.balance }} {{ prod.unit }})
+                  @if (prod.balance <= 0) { [Sem Estoque] }
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="input-quantidade">Quantidade *</label>
+            <input
+              id="input-quantidade"
+              type="number"
+              min="0.01"
+              step="any"
+              [(ngModel)]="itemQuantity"
+              placeholder="Ex: 2"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="input-preco">Valor Unitário (R$) *</label>
+            <input
+              id="input-preco"
+              type="number"
+              min="0.01"
+              step="0.01"
+              [(ngModel)]="itemUnitPrice"
+              placeholder="Ex: 59.90"
+            />
+          </div>
+
+          <div class="form-group-btn">
+            <button
+              type="button"
+              class="btn-primary btn-add-item"
+              (click)="addDraftItem()"
+            >
+              + Adicionar
+            </button>
+          </div>
+        </div>
+      </fieldset>
+
+      <h4>Itens da Nota ({{ draftItems().length }})</h4>
+
+      @if (draftItems().length === 0) {
+        <div class="empty-draft-msg">
+          <p>Nenhum item adicionado à nota fiscal ainda.</p>
+        </div>
+      } @else {
+        <div class="draft-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Unidade</th>
+                <th class="text-right">Qtd</th>
+                <th class="text-right">Valor Unit.</th>
+                <th class="text-right">Subtotal</th>
+                <th class="text-right">Remover</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of draftItems(); track item.productId) {
+                <tr>
+                  <td>{{ item.productDescription }}</td>
+                  <td>{{ item.unit }}</td>
+                  <td class="text-right">{{ item.quantity }}</td>
+                  <td class="text-right">{{ formatCurrency(item.unitPrice) }}</td>
+                  <td class="text-right"><strong>{{ formatCurrency(item.quantity * item.unitPrice) }}</strong></td>
+                  <td class="text-right">
+                    <button
+                      type="button"
+                      class="btn-remove-item"
+                      (click)="removeDraftItem(item.productId)"
+                      title="Remover item"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b42318" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="invoice-summary-bar">
+          <div>
+            <span class="info-label">Situação Inicial</span>
+            <span class="status-badge status-open">Aberta</span>
+          </div>
+          <div class="text-right">
+            <span class="info-label">Valor Total da Nota</span>
+            <strong class="info-total">{{ formatCurrency(draftTotal()) }}</strong>
+          </div>
+        </div>
+      }
+
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="closeNewInvoiceModal()"
+          [disabled]="isSavingInvoice()"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="saveInvoice()"
+          [disabled]="isSavingInvoice() || draftItems().length === 0"
+        >
+          @if (isSavingInvoice()) {
+            <span>Emitindo Nota...</span>
+          } @else {
+            <span>Salvar Nota Fiscal</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal: Visualização / Impressão de Nota Fiscal -->
+@if (invoiceDetails()) {
+  <div class="modal-backdrop" (click)="closeDetails()"></div>
+  <div class="modal-dialog modal-large printable-content" role="dialog" aria-modal="true" aria-labelledby="modal-detalhes-title">
+    <div class="modal-header">
+      <div>
+        <h3 id="modal-detalhes-title">Nota Fiscal Nº {{ invoiceDetails()!.number }}</h3>
+        <span class="modal-subtitle">Emitida em {{ formatDate(invoiceDetails()!.date) }}</span>
+      </div>
+      <button type="button" class="btn-close no-print" (click)="closeDetails()" aria-label="Fechar detalhes">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      @if (printErrorMessage()) {
+        <div class="alert-modal-error no-print">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <p>{{ printErrorMessage() }}</p>
+        </div>
+      }
+
+      <div class="invoice-summary-bar">
+        <div>
+          <span class="info-label">Situação da Nota</span>
+          <span
+            class="status-badge"
+            [class.status-open]="invoiceDetails()!.status === 'Aberta'"
+            [class.status-closed]="invoiceDetails()!.status === 'Fechada'"
+          >
+            {{ invoiceDetails()!.status }}
+          </span>
+        </div>
+
+        <div class="text-right">
+          <span class="info-label">Valor Total</span>
+          <strong class="info-total">{{ formatCurrency(invoiceDetails()!.total_Value) }}</strong>
+        </div>
+      </div>
+
+      <h4>Itens Faturados ({{ invoiceDetails()!.items.length }})</h4>
+
+      <div class="items-table-wrap">
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>Cód. / Descrição do Produto</th>
+              <th>Unid.</th>
+              <th class="text-right">Quantidade</th>
+              <th class="text-right">Preço Unitário</th>
+              <th class="text-right">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of invoiceDetails()!.items; track item.id || item.productId) {
+              <tr>
+                <td>{{ getProductDescription(item.productId) }}</td>
+                <td>{{ getProductUnit(item.productId) }}</td>
+                <td class="text-right">{{ item.quantity }}</td>
+                <td class="text-right">{{ formatCurrency(item.unitPrice) }}</td>
+                <td class="text-right"><strong>{{ formatCurrency(item.quantity * item.unitPrice) }}</strong></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-footer no-print">
+        <button type="button" class="btn-secondary" (click)="closeDetails()">
+          Fechar
+        </button>
+
+        @if (invoiceDetails()!.status === 'Aberta') {
+          <button
+            type="button"
+            class="btn-primary btn-print-main"
+            (click)="printInvoice(invoiceDetails()!.id)"
+            [disabled]="printingInvoiceId() === invoiceDetails()!.id"
+          >
+            @if (printingInvoiceId() === invoiceDetails()!.id) {
+              <span>Processando e Baixando Estoque...</span>
+            } @else {
+              <span>Imprimir e Fechar Nota Fiscal</span>
+            }
+          </button>
+        } @else {
+          <button type="button" class="btn-secondary btn-print-main" (click)="printInvoice(invoiceDetails()!.id)">
+            Reimprimir NF
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

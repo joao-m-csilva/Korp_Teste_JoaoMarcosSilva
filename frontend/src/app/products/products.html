@@ -4,29 +4,29 @@
     <p>Gerenciamento de produtos e controle de estoque</p>
   </div>
 
-  <button type="button" class="btn-primary" (click)="abrirModal()">
+  <button type="button" class="btn-primary" (click)="openModal()">
     + Novo Produto
   </button>
 </div>
 
-@if (sucesso()) {
+@if (successMessage()) {
   <div class="alert-success">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
       <polyline points="22 4 12 14.01 9 11.01"></polyline>
     </svg>
-    <p>{{ sucesso() }}</p>
+    <p>{{ successMessage() }}</p>
   </div>
 }
 
-@if (erro()) {
+@if (errorMessage()) {
   <div class="alert-error">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="10"></circle>
       <line x1="12" y1="8" x2="12" y2="12"></line>
       <line x1="12" y1="16" x2="12.01" y2="16"></line>
     </svg>
-    <p>{{ erro() }}</p>
+    <p>{{ errorMessage() }}</p>
   </div>
 }
 
@@ -41,27 +41,27 @@
       </span>
       <input
         type="search"
-        [ngModel]="busca()"
-        (ngModelChange)="busca.set($event)"
+        [ngModel]="search()"
+        (ngModelChange)="search.set($event)"
         placeholder="Buscar por código ou descrição..."
         aria-label="Buscar produtos"
       />
     </div>
 
     <span class="items-count">
-      Total: <strong>{{ produtosFiltrados().length }}</strong> itens
+      Total: <strong>{{ filteredProducts().length }}</strong> itens
     </span>
   </div>
 
-  @if (carregando()) {
+  @if (isLoading()) {
     <div class="table-state-box">
       <div class="spinner"></div>
       <p>Carregando produtos do estoque...</p>
     </div>
-  } @else if (produtosFiltrados().length === 0) {
+  } @else if (filteredProducts().length === 0) {
     <div class="table-state-box">
-      @if (busca()) {
-        <p>Nenhum produto encontrado para o termo "<strong>{{ busca() }}</strong>".</p>
+      @if (search()) {
+        <p>Nenhum produto encontrado para o termo "<strong>{{ search() }}</strong>".</p>
       } @else {
         <p>Nenhum produto cadastrado ainda. Clique em "<strong>+ Novo Produto</strong>" para começar.</p>
       }
@@ -79,24 +79,24 @@
         </thead>
 
         <tbody>
-          @for (produto of produtosFiltrados(); track produto.id) {
+          @for (product of filteredProducts(); track product.id) {
             <tr>
               <td>
-                <span class="code-badge">{{ produto.code }}</span>
+                <span class="code-badge">{{ product.code }}</span>
               </td>
               <td>
-                <span class="product-name">{{ produto.description }}</span>
+                <span class="product-name">{{ product.description }}</span>
               </td>
               <td>
-                <span class="unit-badge">{{ produto.unit }}</span>
+                <span class="unit-badge">{{ product.unit }}</span>
               </td>
               <td class="text-right">
                 <span
                   class="balance-value"
-                  [class.low-stock]="produto.balance <= 0"
-                  [class.warning-stock]="produto.balance > 0 && produto.balance <= 5"
+                  [class.low-stock]="product.balance <= 0"
+                  [class.warning-stock]="product.balance > 0 && product.balance <= 5"
                 >
-                  {{ produto.balance }}
+                  {{ product.balance }}
                 </span>
               </td>
             </tr>
@@ -108,12 +108,12 @@
 </section>
 
 <!-- Modal de Cadastro de Produto -->
-@if (modalAberto()) {
-  <div class="modal-backdrop" (click)="fecharModal()"></div>
+@if (isModalOpen()) {
+  <div class="modal-backdrop" (click)="closeModal()"></div>
   <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal-header">
       <h3 id="modal-title">Cadastrar Novo Produto</h3>
-      <button type="button" class="btn-close" (click)="fecharModal()" [disabled]="salvando()" aria-label="Fechar modal">
+      <button type="button" class="btn-close" (click)="closeModal()" [disabled]="isSaving()" aria-label="Fechar modal">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -122,43 +122,45 @@
     </div>
 
     <div class="modal-body">
-      @if (erroModal()) {
+      @if (modalErrorMessage()) {
         <div class="alert-modal-error">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <line x1="12" y1="8" x2="12" y2="12"></line>
             <line x1="12" y1="16" x2="12.01" y2="16"></line>
           </svg>
-          <p>{{ erroModal() }}</p>
+          <p>{{ modalErrorMessage() }}</p>
         </div>
       }
 
-      <form (ngSubmit)="salvarProduto()">
+      <form (ngSubmit)="saveProduct()">
         <div class="form-group">
           <label for="codigo">Código (somente números) *</label>
           <input
             id="codigo"
             type="text"
-            placeholder="Ex: 1001"
-            [ngModel]="formNovoProduto().code"
-            (ngModelChange)="formNovoProduto().code = $event"
+            [ngModel]="newProductForm().code"
+            (ngModelChange)="newProductForm.update(f => ({ ...f, code: $event }))"
             name="code"
+            placeholder="Ex: 1001"
             required
+            maxlength="20"
             autocomplete="off"
           />
         </div>
 
         <div class="form-group">
-          <label for="descricao">Descrição (mínimo 10 caracteres) *</label>
+          <label for="descricao">Descrição do Produto *</label>
           <input
             id="descricao"
             type="text"
-            placeholder="Ex: Parafuso Sextavado Aço Inox 1/4"
-            [ngModel]="formNovoProduto().description"
-            (ngModelChange)="formNovoProduto().description = $event"
+            [ngModel]="newProductForm().description"
+            (ngModelChange)="newProductForm.update(f => ({ ...f, description: $event }))"
             name="description"
+            placeholder="Mínimo 10 caracteres (Ex: Cabo de Rede Cat6 305m)"
             required
-            autocomplete="off"
+            minlength="10"
+            maxlength="200"
           />
         </div>
 
@@ -167,43 +169,55 @@
             <label for="unidade">Unidade de Medida *</label>
             <select
               id="unidade"
-              [ngModel]="formNovoProduto().unit"
-              (ngModelChange)="formNovoProduto().unit = $event"
+              [ngModel]="newProductForm().unit"
+              (ngModelChange)="newProductForm.update(f => ({ ...f, unit: $event }))"
               name="unit"
+              required
             >
-              @for (u of unidadesDisponiveis; track u.valor) {
-                <option [value]="u.valor">{{ u.label }}</option>
+              @for (u of availableUnits; track u.value) {
+                <option [value]="u.value">{{ u.label }}</option>
               }
             </select>
           </div>
 
           <div class="form-group">
             <label for="saldo">
-              Quantidade Inicial *
-              @if (isIntegerUnit(formNovoProduto().unit)) {
-                <small class="unit-hint">(apenas inteiros)</small>
+              Saldo Inicial em Estoque *
+              @if (isIntegerUnit(newProductForm().unit)) {
+                <span class="unit-hint">(inteiro)</span>
+              } @else {
+                <span class="unit-hint">(decimal)</span>
               }
             </label>
             <input
               id="saldo"
               type="number"
-              [step]="isIntegerUnit(formNovoProduto().unit) ? '1' : '0.01'"
+              [step]="isIntegerUnit(newProductForm().unit) ? '1' : '0.01'"
               min="0.01"
-              placeholder="Ex: 50"
-              [ngModel]="formNovoProduto().balance"
-              (ngModelChange)="formNovoProduto().balance = $event"
+              [ngModel]="newProductForm().balance"
+              (ngModelChange)="newProductForm.update(f => ({ ...f, balance: $event !== null && $event !== '' ? +$event : null }))"
               name="balance"
+              placeholder="Ex: 10"
               required
             />
           </div>
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn-secondary" (click)="fecharModal()" [disabled]="salvando()">
+          <button
+            type="button"
+            class="btn-secondary"
+            (click)="closeModal()"
+            [disabled]="isSaving()"
+          >
             Cancelar
           </button>
-          <button type="submit" class="btn-primary" [disabled]="salvando()">
-            @if (salvando()) {
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="isSaving()"
+          >
+            @if (isSaving()) {
               <span>Salvando...</span>
             } @else {
               <span>Salvar Produto</span>
