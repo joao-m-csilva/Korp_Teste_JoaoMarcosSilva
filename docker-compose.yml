@@ -30,9 +30,6 @@ services:
     environment:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=korp_teste_db;Username=korp_user;Password=korp_password
-      GROQ_API_KEY: ${GROQ_API_KEY:-}
-      GroqAI__Endpoint: https://api.groq.com/openai/v1/chat/completions
-      GroqAI__Model: llama-3.3-70b-versatile
     ports:
       - "7058:8080"
 
