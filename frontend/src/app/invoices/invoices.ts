@@ -80,7 +80,7 @@ export class Invoices implements OnInit {
   constructor(
     private readonly invoiceService: InvoiceService,
     private readonly productService: ProductService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadData();
@@ -110,24 +110,35 @@ export class Invoices implements OnInit {
   }
 
   openNewInvoiceModal(): void {
-    this.productService.getProducts().subscribe({
-      next: (prods) => {
-        this.products.set(prods);
-      },
-      error: () => {
-        this.modalErrorMessage.set(
-          'Serviço de estoque indisponível no momento. É possível realizar o cadastro da NF, mas a impressão só será realizada depois do restabelecimento do serviço de estoque.',
-        );
-        this.isLoading.set(false);
-      },
-    });
-
     this.draftItems.set([]);
     this.selectedProductId = null;
     this.itemQuantity = 1;
     this.itemUnitPrice = null;
     this.modalErrorMessage.set('');
     this.isNewInvoiceModalOpen.set(true);
+
+    this.productService.getProducts().subscribe({
+      next: (prods) => {
+        this.products.set(prods);
+        this.modalErrorMessage.set('');
+        if (this.errorMessage() === 'Serviço de estoque indisponível no momento.') {
+          this.errorMessage.set('');
+        }
+      },
+      error: () => {
+        this.errorMessage.set('Serviço de estoque indisponível no momento.');
+
+        if (this.products().length > 0) {
+          this.modalErrorMessage.set(
+            'Serviço de estoque indisponível no momento. É possível realizar o cadastro da NF, mas a impressão só será realizada depois do restabelecimento do serviço de estoque.',
+          );
+        } else {
+          this.modalErrorMessage.set(
+            'Serviço de estoque indisponível. Não é possível registrar a NF no momento, tente mais tarde.',
+          );
+        }
+      },
+    });
   }
 
   closeNewInvoiceModal(): void {

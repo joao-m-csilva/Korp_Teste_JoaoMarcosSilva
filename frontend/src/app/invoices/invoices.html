@@ -207,8 +207,11 @@
             <select
               id="select-produto"
               [(ngModel)]="selectedProductId"
+              [disabled]="products().length === 0"
             >
-              <option [ngValue]="null">-- Selecione um produto --</option>
+              <option [ngValue]="null">
+                {{ products().length === 0 ? '-- Nenhum produto disponível --' : '-- Selecione um produto --' }}
+              </option>
               @for (prod of products(); track prod.id) {
                 <option [ngValue]="prod.id" [disabled]="prod.balance <= 0">
                   {{ prod.code }} - {{ prod.description }} (Saldo: {{ prod.balance }} {{ prod.unit }})
@@ -226,6 +229,7 @@
               min="0.01"
               step="any"
               [(ngModel)]="itemQuantity"
+              [disabled]="products().length === 0"
               placeholder="Ex: 2"
             />
           </div>
@@ -238,6 +242,7 @@
               min="0.01"
               step="0.01"
               [(ngModel)]="itemUnitPrice"
+              [disabled]="products().length === 0"
               placeholder="Ex: 59.90"
             />
           </div>
@@ -247,6 +252,7 @@
               type="button"
               class="btn-primary btn-add-item"
               (click)="addDraftItem()"
+              [disabled]="products().length === 0"
             >
               + Adicionar
             </button>
