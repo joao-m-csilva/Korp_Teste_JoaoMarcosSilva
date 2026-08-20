@@ -261,6 +261,19 @@ export class Invoices implements OnInit {
       },
       error: (err) => {
         this.isSavingInvoice.set(false);
+        if (
+          err.status === 0 ||
+          err.status === 503 ||
+          err.status === 502 ||
+          err.status === 504 ||
+          (typeof err.error?.message === 'string' &&
+            err.error.message.toLowerCase().includes('fetch')) ||
+          (typeof err.message === 'string' &&
+            err.message.toLowerCase().includes('fetch'))
+        ) {
+          this.modalErrorMessage.set('Serviço de faturamento ou estoque indisponível no momento.');
+          return;
+        }
         let msg = 'Erro ao criar nota fiscal. Verifique os dados e tente novamente.';
         if (err.error?.message) {
           msg = err.error.message;
@@ -335,7 +348,16 @@ export class Invoices implements OnInit {
       error: (err) => {
         this.printingInvoiceId.set(null);
         let msg = 'Erro ao processar a impressão da nota fiscal.';
-        if (err.status === 503) {
+        if (
+          err.status === 0 ||
+          err.status === 503 ||
+          err.status === 502 ||
+          err.status === 504 ||
+          (typeof err.error?.message === 'string' &&
+            err.error.message.toLowerCase().includes('fetch')) ||
+          (typeof err.message === 'string' &&
+            err.message.toLowerCase().includes('fetch'))
+        ) {
           msg =
             'Serviço de estoque indisponível no momento. Não foi possível baixar o estoque.';
         } else if (err.error?.message) {

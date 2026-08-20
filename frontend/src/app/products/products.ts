@@ -156,10 +156,28 @@ export class Products implements OnInit {
       },
       error: (err) => {
         this.isSaving.set(false);
-        if (err.status === 409) {
+        if (
+          err.status === 0 ||
+          err.status === 503 ||
+          err.status === 502 ||
+          err.status === 504 ||
+          (typeof err.error?.message === 'string' &&
+            err.error.message.toLowerCase().includes('fetch')) ||
+          (typeof err.message === 'string' &&
+            err.message.toLowerCase().includes('fetch'))
+        ) {
+          this.modalErrorMessage.set('Serviço de estoque indisponível no momento.');
+        } else if (err.status === 409) {
           this.modalErrorMessage.set('Já existe um produto cadastrado com este código.');
         } else if (err.error?.message) {
           this.modalErrorMessage.set(err.error.message);
+        } else if (typeof err.error === 'string') {
+          try {
+            const parsed = JSON.parse(err.error);
+            this.modalErrorMessage.set(parsed.message || err.error);
+          } catch {
+            this.modalErrorMessage.set(err.error);
+          }
         } else {
           this.modalErrorMessage.set(
             'Erro ao cadastrar produto. Verifique os dados e tente novamente.',
