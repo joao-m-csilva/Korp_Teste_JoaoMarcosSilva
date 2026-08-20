@@ -210,6 +210,8 @@ npm install
 npm start
 ```
 
+`Observação: Pode ser que na primeira vez executando o projeto, o angular peça para compartilhar dados de uso. Para continuar, apenas aperte a tecla 'n' e depois a tecla 'enter'.`
+
 Acesse a aplicação no navegador em: **`http://localhost:4200`**
 
 ### 4. Executar os Testes do Frontend
